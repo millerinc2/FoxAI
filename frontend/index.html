@@ -1,0 +1,656 @@
+ <!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FoxAI | Onboarding System v2026</title>
+
+<link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
+<link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
+<link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+<link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css](https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css)"/>
+
+<style>
+    /* ========================================
+    ESTILOS MAESTROS - FOXAI DESIGN SYSTEM
+    Inspiración: Apple / Samsung / Minimalismo Extremo
+    ========================================
+    */
+    :root {
+        --primary: #000000;
+        --secondary: #ffffff;
+        --accent: #0071e3;
+        --gray-100: #f5f5f7;
+        --gray-200: #e5e5e7;
+        --gray-300: #d2d2d7;
+        --gray-400: #86868b;
+        --error: #ff3b30;
+        --success: #34c759;
+        --shadow-soft: 0 8px 30px rgba(0,0,0,0.04);
+        --shadow-heavy: 0 20px 40px rgba(0,0,0,0.1);
+        --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        --border-radius: 24px;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        background-color: var(--secondary);
+        color: var(--primary);
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Fondo Decorativo Sutil */
+    .ambient-layer {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(circle at 50% 50%, #ffffff 0%, #fafafa 100%);
+        z-index: -1;
+    }
+
+    .ambient-blur {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: rgba(0, 0, 0, 0.02);
+        filter: blur(80px);
+        border-radius: 50%;
+        z-index: -1;
+        animation: moveBlur 20s infinite alternate ease-in-out;
+    }
+
+    @keyframes moveBlur {
+        from { transform: translate(-20%, -20%); }
+        to { transform: translate(20%, 20%); }
+    }
+
+    /* Contenedor Principal */
+    .onboarding-wrapper {
+        width: 100%;
+        max-width: 500px;
+        padding: 20px;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Barra de Progreso */
+    .progress-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: var(--gray-100);
+        z-index: 1000;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: var(--primary);
+        width: 0%;
+        transition: width 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    /* Card de Contenido */
+    .fox-card {
+        background: var(--secondary);
+        padding: 40px;
+        border-radius: var(--border-radius);
+        text-align: center;
+        position: relative;
+    }
+
+    /* Branding */
+    .brand-container {
+        margin-bottom: 40px;
+    }
+
+    .logo-box {
+        width: 80px;
+        height: 80px;
+        background: var(--primary);
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: var(--shadow-heavy);
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .logo-box:hover {
+        transform: scale(1.05) rotate(5deg);
+    }
+
+    .logo-box i {
+        color: white;
+        font-size: 2.5rem;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -1.5px;
+        margin-bottom: 10px;
+    }
+
+    p.subtitle {
+        color: var(--gray-400);
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin-bottom: 30px;
+    }
+
+    /* Pasos Dinámicos */
+    .step {
+        display: none;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: var(--transition);
+    }
+
+    .step.active {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Elementos de Formulario Modernos */
+    .input-wrapper {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .modern-input {
+        width: 100%;
+        padding: 20px 24px;
+        border: 2px solid var(--gray-200);
+        border-radius: 18px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        outline: none;
+        transition: var(--transition);
+        background: var(--gray-100);
+        text-align: center;
+    }
+
+    .modern-input:focus {
+        border-color: var(--primary);
+        background: white;
+        box-shadow: var(--shadow-soft);
+    }
+
+    /* Grid de Opciones */
+    .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .option-item {
+        padding: 20px;
+        background: var(--gray-100);
+        border: 2px solid transparent;
+        border-radius: 18px;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+    }
+
+    .option-item i {
+        font-size: 1.5rem;
+        color: var(--gray-400);
+    }
+
+    .option-item:hover {
+        background: var(--gray-200);
+    }
+
+    .option-item.selected {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: white;
+    }
+
+    .option-item.selected i {
+        color: white;
+    }
+
+    /* Dropdown Estilizado */
+    .modern-select {
+        width: 100%;
+        padding: 20px;
+        border-radius: 18px;
+        background: var(--gray-100);
+        border: 2px solid var(--gray-200);
+        font-size: 1.1rem;
+        font-weight: 600;
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)' fill='none' viewBox='0 0 24 24' stroke='black'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 20px center;
+        background-size: 20px;
+        text-align: center;
+    }
+
+    /* Botones de Acción */
+    .btn-primary {
+        width: 100%;
+        padding: 22px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary:active {
+        transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+        background: var(--gray-300);
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Confirmación Card */
+    .confirm-box {
+        background: var(--gray-100);
+        padding: 30px;
+        border-radius: 22px;
+        margin-bottom: 30px;
+        border: 1px dashed var(--gray-300);
+    }
+
+    .data-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--gray-400);
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .data-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    /* Loader */
+    .fox-loader {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0,0,0,0.1);
+        border-left-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Mensajes de Error */
+    .error-msg {
+        color: var(--error);
+        font-size: 0.9rem;
+        margin-top: 10px;
+        display: none;
+        font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .fox-card { padding: 30px 20px; }
+        h1 { font-size: 1.8rem; }
+        .options-grid { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+
+<div class="ambient-layer">
+    <div class="ambient-blur"></div>
+</div>
+
+<div class="progress-container">
+    <div class="progress-bar" id="mainProgress"></div>
+</div>
+
+<div class="onboarding-wrapper">
+    <div class="fox-card animate__animated animate__fadeIn">
+        
+        <div class="brand-container">
+            <div class="logo-box">
+                <i class="fas fa-fox"></i>
+            </div>
+        </div>
+
+        <div class="step active" id="step1">
+            <h1>Hola, soy FoxAI.</h1>
+            <p class="subtitle">Bienvenido a la red neuronal avanzada. Vamos a configurar tu entorno personal en pocos pasos.</p>
+            <button class="btn-primary" onclick="nextStep(2)">
+                Comenzar <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="step" id="step2">
+            <h1>¿Cómo te llamas?</h1>
+            <p class="subtitle">Necesito saber quién eres para ajustar mi motor de respuesta.</p>
+            <div class="input-wrapper">
+                <input type="text" id="userName" class="modern-input" placeholder="Tu nombre aquí" autocomplete="off">
+                <div id="errorName" class="error-msg">Por favor, ingresa un nombre válido.</div>
+            </div>
+            <button class="btn-primary" onclick="validateName()">
+                Continuar <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="step" id="step3">
+            <h1>Identidad</h1>
+            <p class="subtitle">Esto ayuda a definir el tono de mis conversaciones contigo.</p>
+            <div class="options-grid">
+                <div class="option-item" onclick="selectGender('Hombre', this)">
+                    <i class="fas fa-mars"></i>
+                    <span>Hombre</span>
+                </div>
+                <div class="option-item" onclick="selectGender('Mujer', this)">
+                    <i class="fas fa-venus"></i>
+                    <span>Mujer</span>
+                </div>
+            </div>
+            <button class="btn-primary" id="btnGender" disabled onclick="nextStep(4)">
+                Siguiente <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="step" id="step4">
+            <h1>Tu ubicación</h1>
+            <p class="subtitle">Para optimizar servidores y servicios locales en tu zona.</p>
+            <div class="input-wrapper">
+                <select id="userCountry" class="modern-select" onchange="enableCountryBtn()">
+                    <option value="" disabled selected>Selecciona tu país</option>
+                    <option value="Colombia">Colombia</option>
+                    <option value="México">México</option>
+                    <option value="Argentina">Argentina</option>
+                    <option value="España">España</option>
+                    <option value="Puerto Rico">Puerto Rico</option>
+                    <option value="República Dominicana">República Dominicana</option>
+                </select>
+            </div>
+            <button class="btn-primary" id="btnCountry" disabled onclick="nextStep(5)">
+                Continuar <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="step" id="step5">
+            <h1>Modo de Interacción</h1>
+            <p class="subtitle">¿Qué nivel de cercanía esperas de nuestra IA?</p>
+            <div class="options-grid">
+                <div class="option-item" onclick="selectRelation('Amistoso', this)">
+                    <i class="fas fa-hands-helping"></i>
+                    <span>Amistoso</span>
+                </div>
+                <div class="option-item" onclick="selectRelation('Formal', this)">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Formal</span>
+                </div>
+                <div class="option-item" onclick="selectRelation('Pareja', this)">
+                    <i class="fas fa-heart"></i>
+                    <span>Pareja</span>
+                </div>
+                <div class="option-item" onclick="selectRelation('Mentor', this)">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Mentor</span>
+                </div>
+            </div>
+            <button class="btn-primary" id="btnRel" disabled onclick="prepareSummary()">
+                Siguiente <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="step" id="step6">
+            <h1>Sincronización Lista.</h1>
+            <p class="subtitle">He procesado tus datos. Estás a punto de entrar al núcleo FoxAI.</p>
+            
+            <div class="confirm-box">
+                <span class="data-label">Identidad Confirmada</span>
+                <span class="data-value" id="sumName">Jefferson</span>
+                
+                <span class="data-label">Parámetros de Red</span>
+                <span id="sumDetails" style="font-weight: 600;">Hombre | Colombia | Amistoso</span>
+            </div>
+
+            <div class="fox-loader" id="finalLoader"></div>
+
+            <button class="btn-primary" id="entryBtn" onclick="finalizeRegistration()">
+                Entrar al Sistema <i class="fas fa-bolt"></i>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    /**
+     * ========================================
+     * FOXAI CORE ENGINE - ONBOARDING LOGIC
+     * ========================================
+     */
+
+    // Endpoints de Backend (Render)
+    const CONFIG = {
+        API_URL: "[https://foxai-backend.onrender.com/api](https://foxai-backend.onrender.com/api)",
+        VERSION: "2.0.26",
+        MAX_STEPS: 6
+    };
+
+    // Estado Global de la Sesión
+    let sessionData = {
+        name: '',
+        gender: '',
+        country: '',
+        relation: '',
+        deviceId: generateDeviceId(),
+        onboardingDate: new Date().toISOString()
+    };
+
+    /**
+     * Inicialización
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("FoxAI Core: Inicializado v" + CONFIG.VERSION);
+        checkExistingSession();
+    });
+
+    /**
+     * Navegación entre pasos
+     */
+    function nextStep(stepNumber) {
+        // Ocultar pasos actuales
+        document.querySelectorAll('.step').forEach(s => {
+            s.classList.remove('active');
+        });
+
+        // Mostrar el nuevo paso
+        const nextStep = document.getElementById(`step${stepNumber}`);
+        nextStep.classList.add('active');
+
+        // Actualizar barra de progreso
+        const progress = ((stepNumber - 1) / (CONFIG.MAX_STEPS - 1)) * 100;
+        document.getElementById('mainProgress').style.width = `${progress}%`;
+    }
+
+    /**
+     * Validación de Nombre (Paso 2)
+     */
+    function validateName() {
+        const nameInput = document.getElementById('userName');
+        const error = document.getElementById('errorName');
+
+        if (nameInput.value.trim().length < 2) {
+            error.style.display = 'block';
+            nameInput.style.borderColor = 'var(--error)';
+            return;
+        }
+
+        sessionData.name = nameInput.value.trim();
+        error.style.display = 'none';
+        nameInput.style.borderColor = 'var(--gray-200)';
+        nextStep(3);
+    }
+
+    /**
+     * Selección de Género (Paso 3)
+     */
+    function selectGender(gender, element) {
+        sessionData.gender = gender;
+        
+        // UI Update
+        document.querySelectorAll('#step3 .option-item').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        element.classList.add('selected');
+        
+        document.getElementById('btnGender').disabled = false;
+    }
+
+    /**
+     * Validación de País (Paso 4)
+     */
+    function enableCountryBtn() {
+        sessionData.country = document.getElementById('userCountry').value;
+        document.getElementById('btnCountry').disabled = false;
+    }
+
+    /**
+     * Selección de Relación (Paso 5)
+     */
+    function selectRelation(rel, element) {
+        sessionData.relation = rel;
+
+        document.querySelectorAll('#step5 .option-item').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        element.classList.add('selected');
+
+        document.getElementById('btnRel').disabled = false;
+    }
+
+    /**
+     * Resumen Final (Paso 6)
+     */
+    function prepareSummary() {
+        document.getElementById('sumName').innerText = sessionData.name;
+        document.getElementById('sumDetails').innerText = 
+            `${sessionData.gender} | ${sessionData.country} | Modo ${sessionData.relation}`;
+        nextStep(6);
+    }
+
+    /**
+     * Registro Final e Integración con Backend / MongoDB
+     */
+    async function finalizeRegistration() {
+        const btn = document.getElementById('entryBtn');
+        const loader = document.getElementById('finalLoader');
+
+        btn.style.display = 'none';
+        loader.style.display = 'block';
+
+        // 1. Guardar localmente para acceso inmediato en el frontend
+        localStorage.setItem('foxai_user', JSON.stringify(sessionData));
+        localStorage.setItem('foxai_token', 'JWT_SIMULATED_' + btoa(sessionData.name));
+
+        try {
+            // 2. Simulación de envío al Backend de Render / MongoDB
+            console.log("Enviando datos a Render...");
+            
+            const response = await fetch(`${CONFIG.API_URL}/users/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sessionData)
+            }).catch(err => {
+                console.warn("Backend offline, continuando con almacenamiento local...");
+                return { ok: true }; // Fallback para desarrollo sin backend activo
+            });
+
+            // 3. Simular delay de "congelación de red neuronal"
+            setTimeout(() => {
+                window.location.href = 'chat.html';
+            }, 1500);
+
+        } catch (error) {
+            console.error("Error en registro:", error);
+            // Si falla el servidor, igual permitimos entrar por persistencia local
+            window.location.href = 'chat.html';
+        }
+    }
+
+    /**
+     * Utilidades
+     */
+    function generateDeviceId() {
+        return 'fox-' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function checkExistingSession() {
+        const saved = localStorage.getItem('foxai_user');
+        if (saved) {
+            console.log("Sesión previa detectada. Redirigiendo...");
+            // Descomentar en producción para saltar onboarding
+            // window.location.href = 'chat.html';
+        }
+    }
+
+    // Soporte para tecla Enter
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const activeStep = document.querySelector('.step.active').id;
+            if (activeStep === 'step2') validateName();
+            if (activeStep === 'step6') finalizeRegistration();
+        }
+    });
+
+</script>
+
+</body>
+</html></html>

@@ -1,0 +1,797 @@
+ <!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FoxAI | Dashboard Control System v2026</title>
+
+<link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
+<link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
+<link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+<link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css](https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css)"/>
+<script src="[https://cdn.jsdelivr.net/npm/chart.js](https://cdn.jsdelivr.net/npm/chart.js)"></script>
+<script src="[https://cdn.socket.io/4.7.2/socket.io.min.js](https://cdn.socket.io/4.7.2/socket.io.min.js)"></script>
+
+<style>
+    /* ========================================
+       FOXAI DASHBOARD DESIGN SYSTEM
+       Estilo: Black & White Premium / Minimalista
+       ======================================== */
+    :root {
+        --primary: #000000;
+        --secondary: #ffffff;
+        --bg-main: #f5f5f7;
+        --sidebar-bg: #ffffff;
+        --card-bg: #ffffff;
+        --text-main: #1d1d1f;
+        --text-muted: #86868b;
+        --border: rgba(0,0,0,0.06);
+        --accent: #0071e3;
+        --success: #34c759;
+        --error: #ff3b30;
+        --transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+        --shadow-sm: 0 4px 12px rgba(0,0,0,0.03);
+        --shadow-md: 0 10px 30px rgba(0,0,0,0.05);
+        --sidebar-width: 280px;
+        --header-height: 80px;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        overflow: hidden;
+        height: 100vh;
+    }
+
+    /* --- Estructura de Layout --- */
+    .dashboard-container {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+    }
+
+    /* --- Sidebar --- */
+    .sidebar {
+        width: var(--sidebar-width);
+        background: var(--sidebar-bg);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        z-index: 100;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .sidebar-header {
+        height: var(--header-height);
+        display: flex;
+        align-items: center;
+        padding: 0 30px;
+        gap: 15px;
+    }
+
+    .logo-square {
+        width: 35px;
+        height: 35px;
+        background: var(--primary);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 800;
+        font-size: 1.2rem;
+    }
+
+    .brand-name {
+        font-weight: 800;
+        font-size: 1.3rem;
+        letter-spacing: -0.8px;
+    }
+
+    .sidebar-menu {
+        flex: 1;
+        padding: 20px 15px;
+        list-style: none;
+    }
+
+    .menu-item {
+        margin-bottom: 5px;
+    }
+
+    .menu-link {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 14px 20px;
+        text-decoration: none;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.95rem;
+        border-radius: 16px;
+        transition: var(--transition);
+    }
+
+    .menu-link:hover {
+        background: #f0f0f2;
+        color: var(--primary);
+    }
+
+    .menu-link.active {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .menu-link i {
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .sidebar-footer {
+        padding: 30px;
+        border-top: 1px solid var(--border);
+    }
+
+    .user-pill {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #f5f5f7;
+        padding: 10px;
+        border-radius: 14px;
+    }
+
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+
+    /* --- Contenido Principal --- */
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .header {
+        height: var(--header-height);
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        z-index: 90;
+    }
+
+    .header-left h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+    }
+
+    .system-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #eefdf3;
+        color: var(--success);
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .status-pulse {
+        width: 8px;
+        height: 8px;
+        background: var(--success);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(52, 199, 89, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
+    }
+
+    .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 40px;
+    }
+
+    /* --- Dashboard Grid --- */
+    .grid-layout {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 24px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        transition: var(--transition);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        display: block;
+    }
+
+    .stat-change {
+        font-size: 0.85rem;
+        margin-top: 10px;
+        font-weight: 600;
+    }
+
+    .positive { color: var(--success); }
+    .negative { color: var(--error); }
+
+    /* --- Gráficas y Secciones Grandes --- */
+    .row-large {
+        grid-column: span 3;
+        background: var(--card-bg);
+        padding: 35px;
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .row-sidebar {
+        grid-column: span 1;
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .chart-container {
+        height: 350px;
+        margin-top: 20px;
+    }
+
+    /* --- Panel de Procesamiento IA --- */
+    .processing-panel {
+        background: var(--primary);
+        color: white;
+        padding: 30px;
+        border-radius: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .neural-bg {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0.15;
+        background: url('[https://www.transparenttextures.com/patterns/carbon-fibre.png](https://www.transparenttextures.com/patterns/carbon-fibre.png)');
+    }
+
+    .brain-loader {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+    }
+
+    .brain-loader i {
+        font-size: 3rem;
+        animation: brainFloat 3s infinite ease-in-out;
+    }
+
+    @keyframes brainFloat {
+        0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
+        50% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+    }
+
+    /* --- Switches & Config --- */
+    .config-list {
+        list-style: none;
+    }
+
+    .config-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .config-item:last-child { border: none; }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 24px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #e5e5e7;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px; width: 18px;
+        left: 3px; bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    /* --- Botones de Acción --- */
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn {
+        padding: 14px 24px;
+        border-radius: 14px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-black { background: var(--primary); color: white; }
+    .btn-white { background: white; color: var(--primary); border: 1px solid var(--border); }
+
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    /* --- Notificaciones / Logs --- */
+    .log-container {
+        background: #fafafa;
+        border-radius: 18px;
+        padding: 20px;
+        height: 200px;
+        overflow-y: auto;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.8rem;
+        border: 1px solid var(--border);
+    }
+
+    .log-entry {
+        margin-bottom: 8px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .log-time { color: var(--text-muted); }
+    .log-msg { color: var(--primary); font-weight: 600; }
+
+    /* --- Responsive Móvil --- */
+    @media (max-width: 1200px) {
+        .grid-layout { grid-template-columns: 1fr 1fr; }
+        .row-large { grid-column: span 2; }
+    }
+
+    @media (max-width: 800px) {
+        .sidebar {
+            position: fixed;
+            left: -100%;
+            height: 100%;
+        }
+        .sidebar.active { left: 0; }
+        .grid-layout { grid-template-columns: 1fr; }
+        .row-large { grid-column: span 1; }
+        .stat-card { grid-column: span 1; }
+        .header { padding: 0 20px; }
+        .scroll-area { padding: 20px; }
+    }
+
+</style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-square">F</div>
+            <span class="brand-name">FoxAI Core</span>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="menu-item"><a href="#" class="menu-link active"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+            <li class="menu-item"><a href="chat.html" class="menu-link"><i class="fas fa-comment-alt"></i> Chats Pro</a></li>
+            <li class="menu-item"><a href="#" class="menu-link"><i class="fas fa-brain"></i> Inteligencia</a></li>
+            <li class="menu-item"><a href="#" class="menu-link"><i class="fas fa-bolt"></i> Automatización</a></li>
+            <li class="menu-item"><a href="#" class="menu-link"><i class="fas fa-folder-open"></i> Documentos</a></li>
+            <li class="menu-item"><a href="#" class="menu-link"><i class="fas fa-sliders-h"></i> Configuración</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="user-avatar" id="userInitial">J</div>
+                <div style="overflow: hidden;">
+                    <p style="font-weight: 700; font-size: 0.85rem; white-space: nowrap; text-overflow: ellipsis;" id="userName">Jefferson M.</p>
+                    <p style="font-size: 0.7rem; color: var(--text-muted);">Root Admin</p>
+                </div>
+                <i class="fas fa-chevron-right" style="margin-left: auto; font-size: 0.7rem; color: #ccc;"></i>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <header class="header">
+            <div class="header-left">
+                <button id="toggleMenu" style="background:none; border:none; font-size: 1.2rem; margin-right: 15px; cursor:pointer; display:none;"><i class="fas fa-bars"></i></button>
+                <h1>Sistema de Control</h1>
+            </div>
+
+            <div class="header-right">
+                <div class="system-status">
+                    <div class="status-pulse"></div>
+                    IVH-X Engine: Activo
+                </div>
+                <button class="icon-btn" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color: var(--text-muted);"><i class="far fa-bell"></i></button>
+                <button class="icon-btn" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color: var(--text-muted);"><i class="far fa-user-circle"></i></button>
+            </div>
+        </header>
+
+        <div class="scroll-area">
+            
+            <div class="grid-layout">
+                
+                <div class="stat-card animate__animated animate__fadeInUp">
+                    <span class="stat-label">Consultas IA</span>
+                    <span class="stat-value" id="valTokens">124,802</span>
+                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> 12.5%</div>
+                </div>
+
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                    <span class="stat-label">Latencia (Groq)</span>
+                    <span class="stat-value" id="valLatency">42ms</span>
+                    <div class="stat-change positive">Óptimo</div>
+                </div>
+
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                    <span class="stat-label">Memoria Usada</span>
+                    <span class="stat-value" id="valMemory">1.2 GB</span>
+                    <div class="stat-change negative"><i class="fas fa-arrow-up"></i> 2.1%</div>
+                </div>
+
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                    <span class="stat-label">API Status</span>
+                    <span class="stat-value" style="color: var(--success); font-size: 1.5rem;">Sincronizado</span>
+                    <div class="stat-change" style="color: var(--text-muted);">MongoDB Atlas Connected</div>
+                </div>
+
+                <div class="row-large animate__animated animate__fadeInLeft">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="font-weight: 800; font-size: 1.2rem;">Actividad del Procesador</h3>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Frecuencia de procesamiento de tokens en tiempo real.</p>
+                        </div>
+                        <div class="btn-group" style="margin-top: 0;">
+                            <button class="btn btn-white" style="padding: 8px 15px; font-size: 0.8rem;">24h</button>
+                            <button class="btn btn-black" style="padding: 8px 15px; font-size: 0.8rem;">7d</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="row-sidebar">
+                    
+                    <div class="processing-panel animate__animated animate__fadeInRight">
+                        <div class="neural-bg"></div>
+                        <h3 style="position: relative; z-index: 2; font-weight: 700; margin-bottom: 5px;">FoxAI Neural Core</h3>
+                        <p style="position: relative; z-index: 2; font-size: 0.75rem; opacity: 0.7;">Optimización continua activada.</p>
+                        
+                        <div class="brain-loader">
+                            <i class="fas fa-atom"></i>
+                        </div>
+
+                        <div style="position: relative; z-index: 2;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px;">
+                                <span>Carga de trabajo</span>
+                                <span>68%</span>
+                            </div>
+                            <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                                <div style="width: 68%; height: 100%; background: white;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card animate__animated animate__fadeInUp">
+                        <h3 style="font-weight: 800; margin-bottom: 20px; font-size: 1rem;">Configuración IA</h3>
+                        <ul class="config-list">
+                            <li class="config-item">
+                                <span>Modo Profesional</span>
+                                <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                            </li>
+                            <li class="config-item">
+                                <span>Creatividad Alta</span>
+                                <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                            </li>
+                            <li class="config-item">
+                                <span>Memoria Persistente</span>
+                                <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <div class="row-large animate__animated animate__fadeInUp">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h3 style="font-weight: 800; font-size: 1.2rem;">Logs del Servidor (Render)</h3>
+                        <button class="btn btn-white" onclick="refreshStats()" style="padding: 10px 20px;"><i class="fas fa-sync-alt"></i> Actualizar</button>
+                    </div>
+                    <div class="log-container" id="logBox">
+                        <div class="log-entry"><span class="log-time">[17:20:01]</span> <span class="log-msg">Iniciando protocolo IVH-X...</span></div>
+                        <div class="log-entry"><span class="log-time">[17:20:05]</span> <span class="log-msg">Conexión con Groq API establecida (Key: ...84X)</span></div>
+                        <div class="log-entry"><span class="log-time">[17:21:12]</span> <span class="log-msg">Sincronizando base de datos MongoDB Atlas.</span></div>
+                        <div class="log-entry"><span class="log-time">[17:22:45]</span> <span class="log-msg">Usuario 'Jefferson' autenticado mediante sesión local.</span></div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-black" onclick="rebootSystem()"><i class="fas fa-power-off"></i> Reiniciar Sistema</button>
+                        <button class="btn btn-white"><i class="fas fa-terminal"></i> Abrir Consola</button>
+                    </div>
+                </div>
+
+                <div class="row-sidebar animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                     <div class="stat-card" style="height: 100%;">
+                        <h3 style="font-weight: 800; margin-bottom: 20px; font-size: 1rem;">Capacidades</h3>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px; font-size: 0.9rem;">
+                                <i class="fas fa-check-circle" style="color: var(--success);"></i> Procesamiento de Texto
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px; font-size: 0.9rem;">
+                                <i class="fas fa-check-circle" style="color: var(--success);"></i> Generación de Imágenes
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px; font-size: 0.9rem;">
+                                <i class="fas fa-check-circle" style="color: var(--success);"></i> Análisis de Documentos
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px; font-size: 0.9rem; opacity: 0.5;">
+                                <i class="far fa-circle"></i> Navegación Web (Beta)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<script>
+    /**
+     * ========================================
+     * FOXAI DASHBOARD CORE ENGINE
+     * ========================================
+     */
+
+    // Configuración de Backend
+    const RENDER_API = "[https://foxai-backend.onrender.com/api](https://foxai-backend.onrender.com/api)";
+    const socket = (typeof io !== 'undefined') ? io("[https://foxai-backend.onrender.com](https://foxai-backend.onrender.com)") : null;
+
+    let userData = JSON.parse(localStorage.getItem('foxai_user')) || { name: 'Jefferson M.' };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initUI();
+        initCharts();
+        initSystemSimulation();
+        fetchBackendStats();
+    });
+
+    /**
+     * Sincronización de UI
+     */
+    function initUI() {
+        document.getElementById('userName').innerText = userData.name;
+        document.getElementById('userInitial').innerText = userData.name.charAt(0).toUpperCase();
+
+        // Mobile Menu Toggle
+        const toggle = document.getElementById('toggleMenu');
+        const sidebar = document.getElementById('sidebar');
+        if (window.innerWidth < 800) {
+            toggle.style.display = 'block';
+            toggle.onclick = () => sidebar.classList.toggle('active');
+        }
+    }
+
+    /**
+     * Gráficas de Actividad (Chart.js)
+     */
+    function initCharts() {
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.1)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+        window.myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                datasets: [{
+                    label: 'Tokens/Sec',
+                    data: [450, 320, 680, 1200, 950, 1500, 1100],
+                    borderColor: '#000000',
+                    borderWidth: 4,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#000000',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: gradient
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.03)' },
+                        ticks: { font: { weight: '600' } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { weight: '600' } }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Comunicación con Backend (Render / MongoDB)
+     */
+    async function fetchBackendStats() {
+        try {
+            const response = await fetch(`${RENDER_API}/system/stats`);
+            const data = await response.json();
+            
+            if (data) {
+                updateDashboardData(data);
+                addLog("Sincronización con Render exitosa.");
+            }
+        } catch (error) {
+            console.warn("Backend offline. Usando simulación de datos.");
+            addLog("Aviso: No se pudo conectar a Render. Modo simulación activado.");
+        }
+    }
+
+    /**
+     * Simulación en tiempo real (Si el backend no está conectado)
+     */
+    function initSystemSimulation() {
+        setInterval(() => {
+            // Simular fluctuación de latencia
+            const latency = Math.floor(Math.random() * (50 - 35) + 35);
+            document.getElementById('valLatency').innerText = latency + "ms";
+
+            // Simular incremento de tokens
+            let currentTokens = parseInt(document.getElementById('valTokens').innerText.replace(',', ''));
+            currentTokens += Math.floor(Math.random() * 5);
+            document.getElementById('valTokens').innerText = currentTokens.toLocaleString();
+
+            // Actualizar gráfica dinámicamente
+            if (window.myChart) {
+                const lastData = window.myChart.data.datasets[0].data;
+                lastData.shift();
+                lastData.push(Math.floor(Math.random() * (1600 - 800) + 800));
+                window.myChart.update('none');
+            }
+        }, 3000);
+    }
+
+    /**
+     * Utilidades
+     */
+    function addLog(msg) {
+        const box = document.getElementById('logBox');
+        const now = new Date();
+        const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        
+        const entry = document.createElement('div');
+        entry.className = 'log-entry animate__animated animate__fadeIn';
+        entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-msg">${msg}</span>`;
+        
+        box.insertBefore(entry, box.firstChild);
+    }
+
+    function refreshStats() {
+        addLog("Solicitando actualización forzada a MongoDB Atlas...");
+        fetchBackendStats();
+        // Efecto visual
+        document.querySelectorAll('.stat-card').forEach(c => {
+            c.style.transform = 'scale(0.98)';
+            setTimeout(() => c.style.transform = 'scale(1)', 200);
+        });
+    }
+
+    function rebootSystem() {
+        if(confirm("¿Estás seguro de reiniciar el núcleo FoxAI? Se perderá la caché de la red neuronal actual.")) {
+            addLog(">>> REINICIO DE SISTEMA INICIADO <<<");
+            document.body.style.opacity = '0.5';
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+    }
+
+    function updateDashboardData(data) {
+        if(data.tokens) document.getElementById('valTokens').innerText = data.tokens.toLocaleString();
+        if(data.latency) document.getElementById('valLatency').innerText = data.latency + "ms";
+        if(data.memory) document.getElementById('valMemory').innerText = data.memory;
+    }
+
+</script>
+
+</body>
+</html></html>

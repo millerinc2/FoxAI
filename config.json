@@ -1,0 +1,142 @@
+{
+"project": {
+"name": "FoxAI",
+"version": "2.0.26",
+"author": "Jefferson Stivem Mendez",
+"environment": "production"
+},
+"server": {
+"port": 3000,
+"host": "0.0.0.0",
+"cors_origin": "*",
+"render_url": "YOUR_RENDER_URL",
+"timeout": 30000
+},
+"database": {
+"mongodb_uri": "YOUR_MONGO_DB_ATLAS_URI",
+"db_name": "FoxAI_Cloud",
+"fallback": {
+"enabled": true,
+"local_path": "./backend/data/fallback.json",
+"sync_interval_ms": 600000
+}
+},
+"ai": {
+"provider": "Groq",
+"api_keys": [
+"YOUR_GROQ_API_KEY_1",
+"YOUR_GROQ_API_KEY_2",
+"YOUR_GROQ_API_KEY_3"
+],
+"default_model": "llama3-70b-8192",
+"fallback_model": "mixtral-8x7b-32768",
+"temperature": 0.7,
+"max_tokens": 4096,
+"top_p": 1,
+"presence_penalty": 0.5,
+"frequency_penalty": 0.5
+},
+"personality": {
+"global_settings": {
+"emotion_level": 0.8,
+"humor_level": 0.6,
+"sarcasm_level": 0.4,
+"flirt_level": 0.3,
+"formality_level": 0.5
+},
+"dynamic_adaptation": true,
+"default_tone": "Relajado",
+"fallback_relationship": "Amigo"
+},
+"whatsapp": {
+"enabled": true,
+"session_name": "FoxAI_Support",
+"typing_simulation": {
+"enabled": true,
+"min_delay_ms": 1500,
+"max_delay_ms": 4000,
+"speed_multiplier": 1.2
+},
+"initial_menu": {
+"header": "Hola, bienvenido al Soporte de FoxAI 🦊",
+"options": [
+"1. 🛠️ Soporte Técnico",
+"2. 💳 Membresías y Pagos",
+"3. 📑 Reclamos y Sugerencias",
+"4. 👤 Hablar con un asesor humano"
+],
+"footer": "Escribe el número de la opción deseada o una palabra clave."
+},
+"auto_reply_outside_hours": false
+},
+"advisors": {
+"total_simulated": 60,
+"allowed_countries": [
+"Colombia",
+"México",
+"Argentina",
+"España",
+"Puerto Rico",
+"República Dominicana"
+],
+"personality_styles": [
+"Muy amable",
+"Formal",
+"Rápido",
+"Serio",
+"Cortante",
+"Alegre"
+],
+"session_persistence_hours": 24
+},
+"image_generation": {
+"engine": "Pollinations",
+"default_provider": "flux",
+"quality_presets": {
+"ultra_realistic": "photorealistic, raw photo, 8k, f/1.8",
+"cinematic": "cinematic lighting, anamorphic, movie still",
+"hdr": "high dynamic range, vibrant colors, deep shadows",
+"anime": "digital art, studio ghibli style, clean lines"
+},
+"default_resolution": "1024x1024",
+"enhance_prompt": true
+},
+"documents": {
+"storage_path": "./backend/generated/",
+"temp_path": "./backend/generated/temp/",
+"allowed_formats": [
+"pdf",
+"docx",
+"xlsx",
+"pptx"
+],
+"auto_cleanup_hours": 1
+},
+"security": {
+"anti_spam": {
+"enabled": true,
+"max_requests_per_minute": 20,
+"block_duration_ms": 300000
+},
+"content_filter": {
+"block_explicit": true,
+"block_harmful_code": true,
+"allowed_languages": ["es", "en", "pt"]
+},
+"sanitization": true
+},
+"limits": {
+"max_history_context": 15,
+"max_message_length": 2000,
+"max_file_size_mb": 10,
+"daily_ai_requests_per_user": 100
+},
+"features": {
+"voice_notes_enabled": false,
+"group_chat_support": true,
+"real_time_memory": true,
+"advisor_system": true,
+"document_gen": true,
+"image_gen": true
+}
+}
