@@ -3,7 +3,7 @@
 /**
  * FoxAI - Main Server Engine v2.0.26
  * Core Architecture: Express + Socket.io + MongoDB Atlas
- * Structure: backend/server.js -> backend/Modules/
+ * Structure: /server.js (Root) -> backend/Modules/
  * Author: Jefferson Stivem Mendez
  */
 
@@ -18,13 +18,13 @@ const compression = require('compression');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 
-// --- IMPORTACIÓN CORREGIDA SEGÚN TU ESTRUCTURA ---
- // --- IMPORTACIÓN CORREGIDA (server.js en la raíz) ---
+// --- IMPORTACIONES CORREGIDAS (Rutas relativas a raíz) ---
 const { logger } = require('./backend/Modules/logger');
-const { connectDB } = require('./backend/Modules/database');
+// Cambiamos 'connectDB' por 'init' que es lo que exporta tu database.js
+const { init: connectDB } = require('./backend/Modules/database');
 const { aiHandler } = require('./backend/Modules/aiHandler');
 const { handleIncomingMessage } = require('./backend/Modules/whatsappFlow');
-const { getUserMemory, saveUserMemory, addMessage } = require('./backend/Modules/memory');
+const { getUserMemory, addMessage } = require('./backend/Modules/memory');
 const { buildPersonalityPrompt } = require('./backend/Modules/personality');
 const { createFromAI } = require('./backend/Modules/documentGen');
 const { listAdvisors } = require('./backend/Modules/advisors');
@@ -40,14 +40,18 @@ const io = new Server(server, {
 });
 
 // --- MIDDLEWARES ---
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false, // Permite cargar recursos externos si es necesario
+}));
 app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Servir archivos estáticos (Documentos generados)
+// Servir archivos estáticos y frontend
+app.use(express.static(path.join(__dirname, 'frontend')));
 const generatedPath = path.join(__dirname, 'generated');
+if (!require('fs').existsSync(generatedPath)) require('fs').mkdirSync(generatedPath);
 app.use('/generated', express.static(generatedPath));
 
 const apiLimiter = rateLimit({
@@ -58,9 +62,9 @@ const apiLimiter = rateLimit({
 
 // --- CONEXIÓN A BASE DE DATOS ---
 connectDB().then(() => {
-    logger.info('Motor FoxAI conectado exitosamente a MongoDB Atlas');
+    logger.success(`Motor FoxAI conectado exitosamente a la base de datos`);
 }).catch(err => {
-    logger.error('Fallo crítico en conexión a Base de Datos', err);
+    logger.error(`Fallo crítico en conexión a Base de Datos:`, err);
 });
 
 // --- RUTAS DE API REST ---
@@ -89,7 +93,7 @@ app.post('/api/chat', apiLimiter, async (req, res) => {
 
         res.json({ success: true, response: aiResponse });
     } catch (error) {
-        logger.error('Error en API /chat', error);
+        logger.error(`Error en API /chat:`, error);
         res.status(500).json({ error: 'Error interno' });
     }
 });
@@ -109,13 +113,18 @@ app.post('/api/document/:format', apiLimiter, async (req, res) => {
         const result = await createFromAI(format, req.body.content, req.body.userData);
         res.json(result);
     } catch (error) {
-        logger.error(`Error generando documento ${format}`, error);
+        logger.error(`Error generando documento ${format}:`, error);
         res.status(500).json({ error: 'Error de generación' });
     }
 });
 
 app.get('/api/advisors', (req, res) => {
     res.json(listAdvisors());
+});
+
+// Redirección para el frontend (SPA Friendly)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 
 // --- LÓGICA DE WEBSOCKETS ---
@@ -140,7 +149,7 @@ io.on('connection', (socket) => {
 
             io.to(userId).emit('new_message', { role: 'ai', content: aiResponse });
         } catch (error) {
-            logger.error('Error en socket', error);
+            logger.error(`Error en socket:`, error);
         }
     });
 });
@@ -153,8 +162,8 @@ server.listen(PORT, () => {
     🦊 FoxAI COGNITIVE ENGINE - ONLINE
     ================================================
     🚀 Servidor: http://localhost:${PORT}
-    📦 Database: MongoDB Atlas
-    🤖 IA: Groq Active
+    📦 Database: MongoDB Atlas / JSON Sync
+    🤖 IA: Groq / Multi-Model Active
     ================================================
     `);
 });
