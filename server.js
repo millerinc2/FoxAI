@@ -19,14 +19,15 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 
 // --- IMPORTACIÓN CORREGIDA SEGÚN TU ESTRUCTURA ---
-const { logger } = require('./Modules/logger');
-const { connectDB } = require('./Modules/database');
-const { aiHandler } = require('./Modules/aiHandler');
-const { handleIncomingMessage, resetFlow } = require('./Modules/whatsappFlow');
-const { getUserMemory, saveUserMemory, addMessage } = require('./Modules/memory');
-const { buildPersonalityPrompt } = require('./Modules/personality');
-const { createFromAI, paths } = require('./Modules/documentGen');
-const { listAdvisors, getAdvisorById } = require('./Modules/advisors');
+ // --- IMPORTACIÓN CORREGIDA (server.js en la raíz) ---
+const { logger } = require('./backend/Modules/logger');
+const { connectDB } = require('./backend/Modules/database');
+const { aiHandler } = require('./backend/Modules/aiHandler');
+const { handleIncomingMessage } = require('./backend/Modules/whatsappFlow');
+const { getUserMemory, saveUserMemory, addMessage } = require('./backend/Modules/memory');
+const { buildPersonalityPrompt } = require('./backend/Modules/personality');
+const { createFromAI } = require('./backend/Modules/documentGen');
+const { listAdvisors } = require('./backend/Modules/advisors');
 
 // --- INICIALIZACIÓN DE APP ---
 const app = express();
