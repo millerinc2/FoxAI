@@ -1,12 +1,12 @@
   {
-  "name": "foxai",
-  "version": "1.0.0",
+   "name": "foxai",
+   "version": "2.0.26",
   "description": "FoxAI Cognitive Suite - Advanced AI Backend with WhatsApp Integration and Document Generation",
-  "main": "backend/server.js",
+   "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js",
+     "start": "node server.js",
+    "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
